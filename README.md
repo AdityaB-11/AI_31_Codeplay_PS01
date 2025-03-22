@@ -1,36 +1,84 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# IDMS AI Avatar Assistant
+
+An AI-powered avatar assistant for IDMS Infotech that provides interactive, conversational support for their ERP system users. This application features a speaking avatar that responds to user queries using both text and voice.
+
+## Features
+
+- **Multi-modal Input**: Accept both text and voice queries from users
+- **Knowledge Base Integration**: Retrieve domain-specific responses from a knowledge base
+- **AI-Driven Fallback**: Use AI-generated responses when queries don't match the knowledge base
+- **Text-to-Speech**: Convert AI-generated text responses into natural-sounding speech
+- **Lip-Synced Avatar**: Display an avatar that visually represents the AI assistant
+- **Multiple Avatar Styles**: Choose from different avatar personalities
+- **Intuitive UI**: Provide a seamless user experience for interacting with the assistant
+
+## Technology Stack
+
+- **Frontend**: Next.js with React and TypeScript
+- **Styling**: Tailwind CSS with responsive design
+- **Speech Recognition**: Web Speech API 
+- **Text-to-Speech**: Web Speech Synthesis API
+- **UI Components**: HeadlessUI, Heroicons
+- **HTTP Client**: Axios for API requests
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Node.js 18.x or later
+- npm 9.x or later
+
+### Installation
+
+1. Clone the repository
+```
+git clone https://github.com/your-username/idms-ai-avatar.git
+cd idms-ai-avatar
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies
+```
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Run the development server
+```
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-## Learn More
+## Project Structure
 
-To learn more about Next.js, take a look at the following resources:
+```
+├── app/
+│   ├── api/                # API routes
+│   │   └── chat/          # Chat API endpoint
+│   ├── components/        # React components
+│   │   ├── AvatarDisplay.tsx  # Avatar visualization
+│   │   ├── ChatInterface.tsx  # Chat UI
+│   │   └── Header.tsx     # App header
+│   ├── hooks/             # Custom React hooks
+│   │   └── useSpeechRecognition.ts  # Speech recognition hook
+│   ├── utils/             # Utility functions
+│   │   └── speechUtils.ts # Speech utilities
+│   ├── page.tsx           # Main page
+│   └── layout.tsx         # App layout
+├── public/                # Static assets
+│   └── avatars/           # Avatar images
+├── types.d.ts             # TypeScript declarations
+└── package.json           # Project dependencies
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Future Enhancements
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Integration with more sophisticated avatar APIs (like D-ID or DeepBrain AI)
+- Support for multiple languages 
+- Integration with IDMS's actual ERP system knowledge base
+- User authentication and personalization
+- Analytics to track common user queries and improve responses
+- Emotion detection to adapt avatar responses
 
-## Deploy on Vercel
+## License
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project is licensed under the MIT License - see the LICENSE file for details.

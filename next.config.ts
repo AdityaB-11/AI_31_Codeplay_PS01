@@ -1,7 +1,8 @@
-import type { NextConfig } from "next";
-
-const nextConfig: NextConfig = {
-  /* config options here */
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  images: {
+    domains: ['api.d-id.com'], // For when we integrate with D-ID API
+  },
 };
 
-export default nextConfig;
+module.exports = nextConfig;
