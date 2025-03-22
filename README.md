@@ -32,7 +32,7 @@ An AI-powered avatar assistant for IDMS Infotech that provides interactive, conv
 
 1. Clone the repository
 ```
-git clone https://github.com/your-username/idms-ai-avatar.git
+git clone https://github.com/AdityaB-11/idms-ai-avatar.git
 cd idms-ai-avatar
 ```
 
