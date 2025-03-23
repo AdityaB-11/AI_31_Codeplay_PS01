@@ -12,16 +12,19 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: 'IDMS AI Avatar Assistant',
-  description: 'An AI-powered avatar assistant for IDMS Infotech',
+export const metadata = {
+  title: 'NimbusERP Enterprise Assistant',
+  description: 'Your intelligent enterprise resource planning assistant powered by advanced AI',
+  icons: {
+    icon: '/favicon.ico',
+  },
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en">
       <body

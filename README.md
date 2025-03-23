@@ -1,84 +1,114 @@
-# IDMS AI Avatar Assistant
+# NimbusERP AI Assistant
 
-An AI-powered avatar assistant for IDMS Infotech that provides interactive, conversational support for their ERP system users. This application features a speaking avatar that responds to user queries using both text and voice.
+A Next.js-based intelligent chat interface that provides product information and support for NimbusERP solutions using AI-powered responses and a knowledge base system.
 
-## Features
+## 🚀 Features
 
-- **Multi-modal Input**: Accept both text and voice queries from users
-- **Knowledge Base Integration**: Retrieve domain-specific responses from a knowledge base
-- **AI-Driven Fallback**: Use AI-generated responses when queries don't match the knowledge base
-- **Text-to-Speech**: Convert AI-generated text responses into natural-sounding speech
-- **Lip-Synced Avatar**: Display an avatar that visually represents the AI assistant
-- **Multiple Avatar Styles**: Choose from different avatar personalities
-- **Intuitive UI**: Provide a seamless user experience for interacting with the assistant
+- **Intelligent Chat Interface**: Dynamic conversation handling with role-based responses
+- **Multiple Support Roles**: 
+  - Business Support Specialist
+  - Technical Support Engineer
+  - Customer Support Representative
+- **Knowledge Base Integration**: Accurate product information and support responses
+- **AI-Powered Responses**: Gemini AI integration for handling complex queries
+- **Modern UI/UX**: Responsive design with Tailwind CSS
+- **Role-Based Avatar System**: Visual representation of different support roles
 
-## Technology Stack
+## 🛠️ Tech Stack
 
-- **Frontend**: Next.js with React and TypeScript
-- **Styling**: Tailwind CSS with responsive design
-- **Speech Recognition**: Web Speech API 
-- **Text-to-Speech**: Web Speech Synthesis API
-- **UI Components**: HeadlessUI, Heroicons
-- **HTTP Client**: Axios for API requests
+- **Frontend**: Next.js 14, React, TypeScript
+- **Styling**: Tailwind CSS
+- **AI Integration**: Google Generative AI (Gemini)
+- **State Management**: React Context
+- **API Routes**: Next.js API Routes
+- **Image Optimization**: Next.js Image Component
 
-## Getting Started
+## 📦 Installation
 
-### Prerequisites
-
-- Node.js 18.x or later
-- npm 9.x or later
-
-### Installation
-
-1. Clone the repository
-```
-git clone https://github.com/AdityaB-11/idms-ai-avatar.git
-cd idms-ai-avatar
+1. Clone the repository:
+```bash
+git clone [repository-url]
 ```
 
-2. Install dependencies
-```
+2. Install dependencies:
+```bash
 npm install
 ```
 
-3. Run the development server
+3. Create a `.env.local` file with required environment variables:
 ```
+GEMINI_API_KEY=your_api_key_here
+```
+
+4. Run the development server:
+```bash
 npm run dev
 ```
 
-4. Open [http://localhost:3000](http://localhost:3000) in your browser
+## 🔧 Configuration
 
-## Project Structure
+The application uses several configuration files:
 
-```
-├── app/
-│   ├── api/                # API routes
-│   │   └── chat/          # Chat API endpoint
-│   ├── components/        # React components
-│   │   ├── AvatarDisplay.tsx  # Avatar visualization
-│   │   ├── ChatInterface.tsx  # Chat UI
-│   │   └── Header.tsx     # App header
-│   ├── hooks/             # Custom React hooks
-│   │   └── useSpeechRecognition.ts  # Speech recognition hook
-│   ├── utils/             # Utility functions
-│   │   └── speechUtils.ts # Speech utilities
-│   ├── page.tsx           # Main page
-│   └── layout.tsx         # App layout
-├── public/                # Static assets
-│   └── avatars/           # Avatar images
-├── types.d.ts             # TypeScript declarations
-└── package.json           # Project dependencies
-```
+- `roleConfig.ts`: Define support roles and their properties
+- `app/api/chat/route.ts`: API route handling for chat functionality
+- `app/components/`: React components for the UI
 
-## Future Enhancements
+## 💡 Usage
 
-- Integration with more sophisticated avatar APIs (like D-ID or DeepBrain AI)
-- Support for multiple languages 
-- Integration with IDMS's actual ERP system knowledge base
-- User authentication and personalization
-- Analytics to track common user queries and improve responses
-- Emotion detection to adapt avatar responses
+The AI Assistant provides support in three main areas:
 
-## License
+1. **Business Support**:
+   - Product information
+   - Pricing details
+   - ROI calculations
+   - Business solutions
+
+2. **Technical Support**:
+   - System configuration
+   - Integration support
+   - Troubleshooting
+   - Technical documentation
+
+3. **Customer Support**:
+   - General inquiries
+   - User guidance
+   - Feature explanations
+   - Support tickets
+
+## 🎯 Key Products
+
+### Nimbus Core
+- Comprehensive ERP solution
+- Features: Accounting, Inventory, HR & Payroll, CRM
+- Pricing: Basic ($49/user/month), Pro ($99/user/month), Enterprise (Custom)
+
+### Nimbus Finance
+- Financial management solution
+- Features: Budgeting, Forecasting, Tax Compliance
+- Pricing: Basic ($29/user/month), Pro ($59/user/month), Enterprise (Custom)
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## 📄 License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 👥 Team
+
+- Project Lead: [Name]
+- Frontend Development: [Name]
+- AI Integration: [Name]
+- UI/UX Design: [Name]
+
+## 📞 Support
+
+For support and queries:
+- Email: support@nimbusERP.com
+- Documentation: [docs-url]
+- Community Forum: [forum-url]

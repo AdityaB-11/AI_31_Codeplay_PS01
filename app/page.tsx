@@ -1,122 +1,145 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import AvatarDisplay from './components/AvatarDisplay';
 import ChatInterface from './components/ChatInterface';
 import Header from './components/Header';
 import { speakText } from './utils/speechUtils';
+import { supabase, createChatSession, saveChatMessage, ChatMessage, ChatSession } from './utils/supabaseClient';
+import { roles } from '@/app/utils/roleConfig';
+
+interface Message {
+  type: 'user' | 'ai';
+  content: string;
+  source?: string;
+  confidence?: number;
+}
+
+interface ApiResponse {
+  response: string;
+  source?: string;
+  confidence?: number;
+}
 
 export default function Home() {
-  const [messages, setMessages] = useState<Array<{type: 'user' | 'ai', content: string}>>([]);
+  const [selectedRole, setSelectedRole] = useState('business');
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      type: 'ai',
+      content: `Welcome! I'm your ${roles['business'].title}. How can I help optimize your business processes today?`,
+      source: 'system',
+      confidence: 1.0
+    }
+  ]);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [selectedAvatar, setSelectedAvatar] = useState('default');
   const [isSpeechEnabled, setIsSpeechEnabled] = useState(true);
+  const [currentSession, setCurrentSession] = useState<ChatSession | null>(null);
+  const [sessionError, setSessionError] = useState<string | null>(null);
 
-  const handleSendMessage = async (message: string) => {
-    if (!message.trim() || isProcessing) return;
-    
-    // Add user message to chat
-    setMessages(prev => [...prev, { type: 'user', content: message }]);
-    setIsProcessing(true);
-    
-    try {
-      // Simulate local response while waiting for API
-      let apiResponse;
-      
-      // Use a timeout to ensure we respond even if the API is slow
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Request timeout')), 5000);
-      });
-      
+  // Initialize chat session
+  useEffect(() => {
+    const initSession = async () => {
       try {
-        // Race between API call and timeout
-        apiResponse = await Promise.race([
-          axios.post('/api/chat', { message }),
-          timeoutPromise
-        ]);
+        setSessionError(null);
+        // Generate a stable temporary user ID
+        const tempUserId = `temp_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+        console.log('Initializing session for user:', tempUserId);
         
-        const aiResponse = apiResponse.data.response;
+        const session = await createChatSession(tempUserId, 'New Chat');
         
-        // Add AI response to chat
-        setMessages(prev => [...prev, { type: 'ai', content: aiResponse }]);
-        
-        // Use browser's speech synthesis for the response if enabled
-        if (isSpeechEnabled && typeof window !== 'undefined') {
-          speakText(aiResponse);
+        if (!session) {
+          const error = 'Failed to create chat session. Please refresh the page to try again.';
+          console.error(error);
+          setSessionError(error);
+          return;
         }
-      } catch (apiError) {
-        console.error("API error:", apiError);
         
-        // If API fails, use a fallback response
-        const fallbackResponse = "I'm sorry, I couldn't process your request at the moment. This might be due to network issues or server load. Could you please try again in a moment?";
+        console.log('Session initialized:', session);
+        setCurrentSession(session);
         
-        setMessages(prev => [...prev, { 
-          type: 'ai', 
-          content: fallbackResponse
-        }]);
+        // Add welcome message based on selected avatar
+        const welcomeMessage: Message = {
+          type: 'ai',
+          content: `Welcome! I'm your ${roles[selectedRole].title}. How can I help you today?`,
+          source: 'system',
+          confidence: 1.0
+        };
+        setMessages([welcomeMessage]);
         
-        if (isSpeechEnabled && typeof window !== 'undefined') {
-          speakText(fallbackResponse);
-        }
+      } catch (error) {
+        const errorMsg = 'Error initializing chat session. Please refresh the page.';
+        console.error(errorMsg, error);
+        setSessionError(errorMsg);
       }
-    } catch (error) {
-      console.error("Error processing message:", error);
-      const errorMessage = 'I apologize, but I encountered an error while processing your request. Please try again or contact your system administrator if the issue persists.';
-      
-      setMessages(prev => [...prev, { 
-        type: 'ai', 
-        content: errorMessage
-      }]);
-      
-      if (isSpeechEnabled && typeof window !== 'undefined') {
-        speakText(errorMessage);
-      }
-    } finally {
-      setIsProcessing(false);
+    };
+
+    initSession();
+  }, [selectedRole]);
+
+  const handleSendMessage = (message: Message | string) => {
+    if (typeof message === 'string') {
+      setMessages(prev => [...prev, { type: 'user', content: message }]);
+    } else {
+      setMessages(prev => [...prev, message]);
     }
   };
 
-  const handleAvatarChange = (avatar: string) => {
-    setSelectedAvatar(avatar);
+  const handleRoleChange = (role: string) => {
+    setSelectedRole(role);
+    // Add welcome message for new role
+    setMessages([
+      {
+        type: 'ai',
+        content: `Welcome! I'm your ${roles[role].title}. How can I help you today?`,
+        source: 'system',
+        confidence: 1.0
+      }
+    ]);
   };
 
-  const toggleSpeech = () => {
-    setIsSpeechEnabled(!isSpeechEnabled);
-  };
+  // Show error message if session initialization fails
+  if (sessionError) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-slate-900 via-blue-950 to-slate-950 p-6 flex items-center justify-center">
+        <div className="bg-red-900/20 backdrop-blur-sm border border-red-800/30 rounded-lg p-6 max-w-md w-full">
+          <h3 className="text-red-300 font-medium mb-2">Connection Error</h3>
+          <p className="text-gray-300 text-sm">{sessionError}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="mt-4 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
+          >
+            Retry Connection
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-slate-900 via-blue-950 to-slate-950 p-6">
-      <div className="max-w-6xl mx-auto flex flex-col gap-6">
-        <Header 
-          onAvatarChange={handleAvatarChange} 
-          isSpeechEnabled={isSpeechEnabled}
-          onToggleSpeech={toggleSpeech}
-        />
+    <div className="min-h-screen bg-gradient-to-b from-slate-900 via-blue-950 to-slate-950 p-6">
+      <div className="max-w-6xl mx-auto">
+        <Header selectedRole={selectedRole} onRoleChange={handleRoleChange} />
         
-        <div className="flex flex-col md:flex-row gap-6 w-full">
-          <div className="flex-1 max-w-full md:max-w-[45%]">
+        <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-1">
             <AvatarDisplay 
-              selectedAvatar={selectedAvatar}
+              selectedAvatar={selectedRole}
               isProcessing={isProcessing}
-              currentMessage={messages.length > 0 ? messages[messages.length - 1] : null}
+              currentMessage={messages[messages.length - 1] || null}
             />
           </div>
           
-          <div className="flex-1">
+          <div className="lg:col-span-2">
             <ChatInterface 
               messages={messages}
               onSendMessage={handleSendMessage}
+              selectedRole={selectedRole}
               isProcessing={isProcessing}
             />
           </div>
         </div>
-        
-        <footer className="text-center text-gray-500 text-xs py-4">
-          <p>© {new Date().getFullYear()} IDMS Infotech Ltd. All rights reserved.</p>
-          <p className="mt-1">Enterprise Resource Planning System v3.2.1</p>
-        </footer>
       </div>
-    </main>
+    </div>
   );
 }

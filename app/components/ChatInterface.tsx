@@ -4,22 +4,80 @@ import { useState, useRef, useEffect } from 'react';
 import { MicrophoneIcon, PaperAirplaneIcon, StopIcon } from '@heroicons/react/24/outline';
 import useSpeechRecognition from '../hooks/useSpeechRecognition';
 import axios from 'axios';
+import { Role, roles } from '../utils/roleConfig';
+import ReactMarkdown from 'react-markdown';
+import type { Components } from 'react-markdown';
+import { searchKnowledge } from '../utils/knowledgeBase';
 
-interface ChatInterfaceProps {
-  messages: Array<{type: 'user' | 'ai', content: string}>;
-  onSendMessage: (message: string) => void;
-  isProcessing: boolean;
+interface Message {
+  type: 'user' | 'ai';
+  content: string;
+  source?: string;
+  confidence?: number;
 }
 
+interface ChatInterfaceProps {
+  selectedRole: string;
+  messages: Message[];
+  onSendMessage: (message: string | Message) => void;
+  isProcessing?: boolean;
+}
+
+const markdownComponents: Partial<Components> = {
+  h1: ({ node, ...props }) => (
+    <h1 className="text-xl font-bold mb-4 text-blue-300" {...props} />
+  ),
+  h2: ({ node, ...props }) => (
+    <h2 className="text-lg font-semibold mb-3 text-blue-200" {...props} />
+  ),
+  h3: ({ node, ...props }) => (
+    <h3 className="text-base font-medium mb-2 text-blue-100" {...props} />
+  ),
+  ul: ({ node, ...props }) => (
+    <ul className="list-disc list-inside mb-4 space-y-1" {...props} />
+  ),
+  ol: ({ node, ...props }) => (
+    <ol className="list-decimal list-inside mb-4 space-y-1" {...props} />
+  ),
+  li: ({ node, ...props }) => (
+    <li className="text-gray-200" {...props} />
+  ),
+  code: ({ node, ...props }) => (
+    <code className="bg-slate-800 px-1.5 py-0.5 rounded text-blue-300 text-sm" {...props} />
+  ),
+  pre: ({ node, ...props }) => (
+    <pre className="bg-slate-800/50 p-3 rounded-lg mb-4 overflow-x-auto" {...props} />
+  ),
+  p: ({ node, ...props }) => (
+    <p className="mb-3 last:mb-0" {...props} />
+  ),
+  blockquote: ({ node, ...props }) => (
+    <blockquote className="border-l-4 border-blue-500 pl-4 italic mb-4" {...props} />
+  ),
+  a: ({ node, ...props }) => (
+    <a 
+      className="text-blue-400 hover:text-blue-300 underline" 
+      target="_blank" 
+      rel="noopener noreferrer"
+      {...props}
+    />
+  ),
+};
+
 export default function ChatInterface({ 
+  selectedRole, 
   messages, 
   onSendMessage,
-  isProcessing 
+  isProcessing: parentIsProcessing 
 }: ChatInterfaceProps) {
-  const [inputValue, setInputValue] = useState('');
+  const [inputMessage, setInputMessage] = useState('');
+  const [localIsProcessing, setLocalIsProcessing] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   
+  // Use parent isProcessing if provided, otherwise use local state
+  const isProcessing = parentIsProcessing ?? localIsProcessing;
+
   const { 
     transcript, 
     isListening, 
@@ -31,34 +89,257 @@ export default function ChatInterface({
   // Update input value when transcript changes
   useEffect(() => {
     if (transcript) {
-      setInputValue(transcript);
+      setInputMessage(transcript);
     }
   }, [transcript]);
   
   // Scroll to bottom when messages change
-  useEffect(() => {
+  const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
   }, [messages]);
 
   // Focus input field when component mounts and after sending a message
   useEffect(() => {
-    // Short timeout to ensure the input is rendered
     const timer = setTimeout(() => {
       inputRef.current?.focus();
     }, 100);
     
     return () => clearTimeout(timer);
-  }, [messages.length]); // Re-focus after sending a message
+  }, [messages.length]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e.target.value);
+  const currentRole = roles[selectedRole];
+  
+  const formatResponseByRole = (response: string, role: Role, source?: string): string => {
+    // Don't format if already formatted
+    if (response.includes('###') || response.includes('•')) {
+      return response;
+    }
+
+    // Clean up any existing bullet points for consistent formatting
+    const cleanResponse = response.replace(/^[•*-]\s*/gm, '');
+    
+    switch (role) {
+      case 'technical':
+        if (source === 'Support History') {
+          return [
+            '### Issue Analysis',
+            '',
+            cleanResponse,
+            '',
+            '### Prevention Tips',
+            '• Document the solution in your team\'s knowledge base',
+            '• Consider adding monitoring for similar issues',
+            '• Review and update related documentation'
+          ].join('\n');
+        }
+        return [
+          '### Technical Details',
+          '',
+          cleanResponse,
+          '',
+          '### Additional Resources',
+          '• Check our developer documentation for code examples',
+          '• Join our technical community for more discussions',
+          '• Contact our dev support team for advanced assistance'
+        ].join('\n');
+
+      case 'business':
+        return [
+          '### Business Overview',
+          '',
+          cleanResponse,
+          '',
+          '### Key Benefits',
+          '• Improved operational efficiency',
+          '• Cost-effective solution',
+          '• Scalable for business growth',
+          '',
+          '### Next Steps',
+          '• Schedule a demo for detailed walkthrough',
+          '• Review pricing and ROI calculator',
+          '• Connect with our business solutions team'
+        ].join('\n');
+
+      case 'customer':
+      default:
+        return [
+          '### Solution',
+          '',
+          cleanResponse,
+          '',
+          '### Need More Help?',
+          '• Contact our 24/7 support team',
+          '• Visit our help center for tutorials',
+          '• Join our community forum'
+        ].join('\n');
+    }
+  };
+  
+  const processUserMessage = async (message: string) => {
+    if (!message) return;
+    
+    try {
+      setLocalIsProcessing(true);
+      
+      // Add the user's message first
+      onSendMessage({
+        type: 'user',
+        content: message
+      });
+
+      // First check knowledge base
+      const kbResponse = searchKnowledge(message);
+      
+      if (kbResponse.found && kbResponse.response) {
+        // Add slight delay for natural feel
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        const formattedResponse = formatResponseByRole(
+          kbResponse.response,
+          roles[selectedRole].id,
+          kbResponse.source
+        );
+        
+        onSendMessage({
+          type: 'ai',
+          content: formattedResponse,
+          source: kbResponse.source,
+          confidence: kbResponse.confidence
+        });
+        
+        setLocalIsProcessing(false);
+        return;
+      }
+
+      // If no knowledge base match, use AI service
+      try {
+        const response = await axios.post('/api/chat', {
+          message,
+          role: roles[selectedRole].id,
+          context: {
+            products: ['Nimbus Core', 'Nimbus Finance', 'Nimbus HR', 'Nimbus SCM', 'Nimbus CRM'],
+            currentRole: roles[selectedRole].title
+          }
+        });
+
+        if (response?.data?.message) {
+          const formattedResponse = formatResponseByRole(
+            response.data.message,
+            roles[selectedRole].id,
+            response.data.source || 'AI Assistant'
+          );
+
+          onSendMessage({
+            type: 'ai',
+            content: formattedResponse,
+            source: response.data.source || 'AI Assistant',
+            confidence: response.data.confidence || 0.85
+          });
+        } else if (response?.data?.error) {
+          // Handle specific error messages from the API
+          const errorMessage = response.data.error;
+          const formattedError = formatResponseByRole(
+            errorMessage,
+            roles[selectedRole].id,
+            'Error'
+          );
+
+          onSendMessage({
+            type: 'ai',
+            content: formattedError,
+            source: 'Error',
+            confidence: 0
+          });
+        } else {
+          throw new Error('Invalid response format from AI service');
+        }
+      } catch (aiError: any) {
+        console.error('AI service error:', aiError);
+        
+        // Try to find partial matches in knowledge base
+        const keywords = message.toLowerCase().split(' ')
+          .filter(word => word.length > 3)
+          .slice(0, 3)
+          .join(' ');
+        
+        const fallbackResponse = searchKnowledge(keywords);
+        
+        if (fallbackResponse.found && fallbackResponse.response) {
+          const formattedResponse = formatResponseByRole(
+            fallbackResponse.response,
+            roles[selectedRole].id,
+            'Knowledge Base'
+          );
+
+          onSendMessage({
+            type: 'ai',
+            content: formattedResponse,
+            source: 'Knowledge Base',
+            confidence: 0.95
+          });
+        } else {
+          // Use role-specific error messages
+          const errorResponse = roles[selectedRole].id === 'technical' 
+            ? 'Technical Support: I apologize, but I\'m experiencing connectivity issues. Please try again shortly, or check our technical documentation.'
+            : roles[selectedRole].id === 'business'
+            ? 'Business Support: I apologize, but I\'m temporarily unable to process your request. Please try again soon, or contact our business solutions team.'
+            : 'Customer Support: I apologize, but I\'m having trouble processing your request. Please try again shortly, or contact our support team.';
+
+          const formattedError = formatResponseByRole(
+            errorResponse,
+            roles[selectedRole].id,
+            'System'
+          );
+
+          onSendMessage({
+            type: 'ai',
+            content: formattedError,
+            source: 'System',
+            confidence: 0.5
+          });
+        }
+      }
+
+    } catch (error) {
+      console.error('Error processing message:', error);
+      const errorMessage = "I apologize, but I encountered an unexpected error. Please try again or contact our support team if the issue persists.";
+      
+      const formattedError = formatResponseByRole(
+        errorMessage,
+        roles[selectedRole].id,
+        'Error'
+      );
+
+      onSendMessage({
+        type: 'ai',
+        content: formattedError,
+        source: 'Error',
+        confidence: 0
+      });
+    } finally {
+      setLocalIsProcessing(false);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (inputValue.trim() && !isProcessing) {
-      onSendMessage(inputValue.trim());
-      setInputValue('');
+    if (!inputMessage || isProcessing) return;
+    
+    const trimmedMessage = inputMessage.trim();
+    if (trimmedMessage) {
+      processUserMessage(trimmedMessage);
+      setInputMessage('');
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit(e);
     }
   };
 
@@ -70,93 +351,113 @@ export default function ChatInterface({
     }
   };
 
+  const formatMessage = (message: Message) => {
+    // For user messages, just return the content
+    if (message.type === 'user') return message.content;
+
+    // For AI messages, check if it's already formatted
+    if (message.content.includes('###') || message.content.includes('•')) {
+      return message.content;
+    }
+
+    const currentRole = roles[selectedRole];
+    if (!currentRole) return message.content;
+
+    return formatResponseByRole(message.content, currentRole.id, message.source);
+  };
+
   return (
-    <div className="bg-gradient-to-b from-slate-800 to-slate-900 shadow-xl rounded-lg flex flex-col h-full">
-      <div className="flex-1 overflow-y-auto p-5 scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-transparent">
-        <div className="flex flex-col gap-5">
-          {messages.length === 0 && (
-            <div className="text-center py-12">
-              <div className="bg-blue-900/20 backdrop-blur-sm border border-blue-800/30 rounded-lg py-6 px-4">
-                <h3 className="text-blue-300 font-medium mb-2">Welcome to IDMS Enterprise Assistant</h3>
-                <p className="text-gray-400 text-sm">
-                  Ask me any question about the IDMS ERP system, such as generating reports, 
-                  managing inventory, or troubleshooting common issues.
-                </p>
-              </div>
-            </div>
-          )}
-          
-          {messages.map((message, index) => (
-            <div 
-              key={index} 
-              className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'} animate-fadeIn`}
+    <div className="bg-gradient-to-b from-slate-800 to-slate-900 rounded-lg shadow-xl flex flex-col h-[600px]">
+      {/* Messages container */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {messages.map((message, index) => (
+          <div
+            key={index}
+            className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
+          >
+            <div
+              className={`max-w-[80%] rounded-lg p-4 ${
+                message.type === 'user'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-slate-700 text-gray-100'
+              }`}
             >
-              <div 
-                className={`max-w-[85%] rounded-lg px-4 py-3 shadow-md ${
-                  message.type === 'user' 
-                    ? 'bg-blue-600 text-white rounded-tr-none' 
-                    : 'bg-slate-700 text-gray-100 rounded-tl-none border border-slate-600'
-                }`}
-              >
-                <p className="text-sm leading-relaxed">{message.content}</p>
-                <div className="text-right mt-1">
-                  <span className={`text-xs ${message.type === 'user' ? 'text-blue-200' : 'text-gray-400'}`}>
-                    {new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                  </span>
-                </div>
+              <div className="prose prose-invert max-w-none text-sm">
+                <ReactMarkdown components={markdownComponents}>
+                  {formatMessage(message)}
+                </ReactMarkdown>
               </div>
+              
+              {message.source && (
+                <div className="mt-2 text-xs opacity-70 border-t border-gray-600 pt-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-blue-300">Source:</span> 
+                    <span>{message.source}</span>
+                    {message.confidence && (
+                      <span className="bg-blue-900/30 px-2 py-0.5 rounded-full text-blue-300">
+                        {Math.round(message.confidence * 100)}% confidence
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
-          ))}
-          <div ref={messagesEndRef} />
-        </div>
+          </div>
+        ))}
+        <div ref={messagesEndRef} />
       </div>
-      
-      <div className="border-t border-slate-700 p-4">
-        {speechError && (
-          <div className="text-red-400 text-xs mb-2 bg-red-900/20 p-2 rounded">
-            Error: {speechError}
+
+      {/* Input form */}
+      <form onSubmit={handleSubmit} className="p-4 border-t border-slate-700">
+        <div className="relative">
+          <textarea
+            ref={inputRef}
+            value={inputMessage}
+            onChange={(e) => setInputMessage(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Ask NimbusERP Assistant..."
+            className={`w-full bg-slate-700 text-white rounded-lg pl-4 pr-24 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none ${
+              isProcessing ? 'opacity-50' : ''
+            }`}
+            rows={2}
+            disabled={isProcessing}
+          />
+          <div className="absolute right-2 bottom-2 flex items-center gap-2">
+            <button
+              type="button"
+              onClick={toggleRecording}
+              className={`rounded-lg p-2 ${
+                isListening 
+                  ? 'text-red-500 hover:text-red-400' 
+                  : 'text-gray-400 hover:text-gray-300'
+              }`}
+              disabled={isProcessing}
+            >
+              {isListening ? (
+                <StopIcon className="h-6 w-6" />
+              ) : (
+                <MicrophoneIcon className="h-6 w-6" />
+              )}
+            </button>
+            <button
+              type="submit"
+              className={`rounded-lg p-2 ${
+                !inputMessage.trim() || isProcessing
+                  ? 'text-gray-500 cursor-not-allowed'
+                  : 'text-blue-500 hover:text-blue-400'
+              }`}
+              disabled={!inputMessage.trim() || isProcessing}
+            >
+              <PaperAirplaneIcon className="h-6 w-6" />
+            </button>
+          </div>
+        </div>
+        {isProcessing && (
+          <div className="mt-2 text-sm text-blue-400 animate-pulse">
+            Processing your request...
           </div>
         )}
-        
-        <form onSubmit={handleSubmit} className="flex gap-2">
-          <input
-            ref={inputRef}
-            type="text"
-            value={inputValue}
-            onChange={handleInputChange}
-            disabled={isProcessing || isListening}
-            placeholder={isListening ? "Listening..." : "Type your message..."}
-            className="flex-1 bg-slate-700 text-white rounded-full px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 border border-slate-600 text-sm"
-          />
-          
-          <button
-            type="button"
-            onClick={toggleRecording}
-            disabled={isProcessing}
-            className={`rounded-full p-2.5 transition-all duration-300 ${
-              isListening 
-                ? 'bg-red-600 hover:bg-red-700 border border-red-500 ring-2 ring-red-500/50' 
-                : 'bg-slate-600 hover:bg-slate-700 border border-slate-500'
-            }`}
-            title={isListening ? "Stop listening" : "Start voice input"}
-          >
-            {isListening ? (
-              <StopIcon className="h-5 w-5 text-white" />
-            ) : (
-              <MicrophoneIcon className="h-5 w-5 text-white" />
-            )}
-          </button>
-          
-          <button
-            type="submit"
-            disabled={isProcessing || !inputValue.trim()}
-            className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800/50 disabled:opacity-50 text-white rounded-full p-2.5 transition-all duration-300 border border-blue-500 disabled:border-blue-700"
-            title="Send message"
-          >
-            <PaperAirplaneIcon className="h-5 w-5" />
-          </button>
-        </form>
-      </div>
+      </form>
     </div>
   );
 } 

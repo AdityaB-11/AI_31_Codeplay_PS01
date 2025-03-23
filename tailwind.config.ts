@@ -26,9 +26,34 @@ const config: Config = {
         'soft': '0 2px 15px -3px rgba(0, 0, 0, 0.07), 0 10px 20px -2px rgba(0, 0, 0, 0.04)',
         'enterprise': '0 4px 12px rgba(0, 0, 0, 0.1), 0 0 1px rgba(0, 0, 0, 0.1)',
       },
+      typography: {
+        DEFAULT: {
+          css: {
+            color: '#94a3b8',
+            a: {
+              color: '#60a5fa',
+              '&:hover': {
+                color: '#93c5fd',
+              },
+            },
+            'h1, h2, h3, h4': {
+              color: '#e2e8f0',
+              'scroll-margin-top': '6rem',
+            },
+            'code::before': {
+              content: '""',
+            },
+            'code::after': {
+              content: '""',
+            },
+          },
+        },
+      },
     },
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/typography'),
+  ],
 };
 
 export default config; 

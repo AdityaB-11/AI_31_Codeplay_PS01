@@ -1,0 +1,167 @@
+{
+    "company": {
+      "name": "NimbusERP",
+      "industry": "Enterprise Resource Planning",
+      "headquarters": "San Francisco, CA",
+      "founded": 2012,
+      "employees": 500,
+      "clients": ["TechCorp", "RetailMax", "HealthFirst", "AutoNova", "EduSmart", "MediCare Systems", "LogiTrack", "FinBank", "AgroSupply", "BuildMate", "TransGlobal", "GreenEnergy Solutions", "MetroTraders", "CloudNet Systems", "SmartHomes Inc.", "UrbanTech", "WellnessFirst", "AutoParts Direct", "E-Commerce Hub"]
+    },
+    "products": [
+      {
+        "name": "Nimbus Core",
+        "description": "Comprehensive ERP solution for businesses of all sizes",
+        "features": ["Accounting", "Inventory Management", "HR & Payroll", "CRM", "Supply Chain Management", "Analytics & Reporting", "Workflow Automation", "Multi-Location Support", "AI-powered Insights", "Custom Workflows", "Mobile App Support", "Cloud Hosting"],
+        "pricing": {
+          "basic": "$49/user/month",
+          "pro": "$99/user/month",
+          "enterprise": "Custom pricing"
+        }
+      },
+      {
+        "name": "Nimbus Finance",
+        "description": "Advanced financial planning and reporting tools",
+        "features": ["Budgeting", "Forecasting", "Tax Compliance", "Expense Management", "Multi-Currency Support", "Financial Risk Analysis", "Automated Billing", "Investment Tracking", "Invoice Management"],
+        "pricing": {
+          "basic": "$29/user/month",
+          "pro": "$59/user/month",
+          "enterprise": "Custom pricing"
+        }
+      },
+      {
+        "name": "Nimbus HR",
+        "description": "Human resource management solution with AI-powered insights",
+        "features": ["Employee Onboarding", "Payroll Processing", "Benefits Administration", "Performance Management", "AI-driven Workforce Analytics", "Time Tracking & Leave Management", "Employee Self-Service Portal", "HR Compliance Tracking"],
+        "pricing": {
+          "basic": "$39/user/month",
+          "pro": "$79/user/month",
+          "enterprise": "Custom pricing"
+        }
+      },
+      {
+        "name": "Nimbus SCM",
+        "description": "Supply Chain Management for optimized logistics",
+        "features": ["Order Fulfillment", "Supplier Management", "Demand Forecasting", "Warehouse Automation", "Shipping & Tracking", "AI-powered Demand Prediction", "Real-time Inventory Updates"],
+        "pricing": {
+          "basic": "$59/user/month",
+          "pro": "$119/user/month",
+          "enterprise": "Custom pricing"
+        }
+      },
+      {
+        "name": "Nimbus CRM",
+        "description": "Customer Relationship Management with intelligent automation",
+        "features": ["Lead Management", "Sales Pipeline Tracking", "Customer Engagement Analytics", "Email & SMS Automation", "Chatbot Integration", "AI-driven Customer Support", "Social Media Monitoring"],
+        "pricing": {
+          "basic": "$35/user/month",
+          "pro": "$69/user/month",
+          "enterprise": "Custom pricing"
+        }
+      }
+    ],
+    "faqs": [
+      {
+        "question": "How do I reset my password?",
+        "answer": "Go to Settings > Security > Reset Password and follow the instructions."
+      },
+      {
+        "question": "Does NimbusERP integrate with third-party applications?",
+        "answer": "Yes, we offer API integrations with popular platforms like Salesforce, QuickBooks, and Shopify."
+      },
+      {
+        "question": "Is training available for new users?",
+        "answer": "Yes, we offer onboarding training sessions and detailed documentation for new users."
+      },
+      {
+        "question": "Can I customize reports in NimbusERP?",
+        "answer": "Absolutely! Our reporting module allows users to create and customize reports with ease."
+      },
+      {
+        "question": "What kind of customer support is available?",
+        "answer": "We provide 24/7 customer support via chat, email, and phone for enterprise users."
+      },
+      {
+        "question": "How secure is NimbusERP?",
+        "answer": "We use end-to-end encryption, multi-factor authentication, and regular security audits to ensure data protection."
+      },
+      {
+        "question": "What is the uptime guarantee for NimbusERP?",
+        "answer": "We guarantee a 99.9% uptime for our cloud-hosted ERP solutions."
+      }
+    ],
+    "support_tickets": [
+      {
+        "id": "TKT001",
+        "user": "John Doe",
+        "issue": "Unable to generate monthly financial report",
+        "status": "Resolved",
+        "resolution": "User was guided to update their report settings."
+      },
+      {
+        "id": "TKT002",
+        "user": "Jane Smith",
+        "issue": "System running slow during peak hours",
+        "status": "In Progress",
+        "resolution": "Investigation ongoing to optimize server load."
+      },
+      {
+        "id": "TKT003",
+        "user": "Mike Johnson",
+        "issue": "Integration with QuickBooks failing",
+        "status": "Resolved",
+        "resolution": "Reconfigured API settings and provided updated documentation."
+      },
+      {
+        "id": "TKT004",
+        "user": "Emily Clark",
+        "issue": "Data export feature not working",
+        "status": "Open",
+        "resolution": "Pending investigation."
+      },
+      {
+        "id": "TKT005",
+        "user": "Robert Green",
+        "issue": "Payment processing errors in Nimbus Finance",
+        "status": "Resolved",
+        "resolution": "Updated payment gateway configurations."
+      },
+      {
+        "id": "TKT006",
+        "user": "Sophia Adams",
+        "issue": "Customer portal login issues",
+        "status": "Resolved",
+        "resolution": "User credentials were reset and tested successfully."
+      }
+    ],
+    "employee_knowledge_base": [
+      {
+        "topic": "Payroll Processing",
+        "details": "Payroll is processed on the 5th of every month. Ensure all employee details are up-to-date."
+      },
+      {
+        "topic": "Inventory Reconciliation",
+        "details": "Use the Inventory module to perform stock audits and adjustments every quarter."
+      },
+      {
+        "topic": "Customer Support Guidelines",
+        "details": "Support teams should follow the structured workflow for handling customer queries efficiently."
+      },
+      {
+        "topic": "Security Best Practices",
+        "details": "All employees should enable two-factor authentication and follow data protection policies."
+      },
+      {
+        "topic": "Compliance Policies",
+        "details": "Ensure all transactions adhere to regulatory standards and compliance frameworks."
+      },
+      {
+        "topic": "AI and Automation in ERP",
+        "details": "Employees should familiarize themselves with AI-driven automation tools in NimbusERP to improve efficiency."
+      },
+      {
+        "topic": "Remote Work Guidelines",
+        "details": "Use secure VPN access and follow company policies for remote work security."
+      }
+    ]
+  }
+  
