@@ -1,18 +1,26 @@
-# NimbusERP AI Assistant
+# AI Avatar Assistant with Knowledge Base Integration
 
-A Next.js-based intelligent chat interface that provides product information and support for NimbusERP solutions using AI-powered responses and a knowledge base system.
+A versatile AI-powered avatar assistant that provides interactive, conversational support using a combination of knowledge base responses and AI-generated fallbacks. This demonstration uses the Nimbus ERP dataset to showcase the system's capabilities in handling domain-specific queries.
 
-## 🚀 Features
+## 🎯 Features
 
 - **Intelligent Chat Interface**: Dynamic conversation handling with role-based responses
-- **Multiple Support Roles**: 
+- **Knowledge Base Integration**: 
+  - Pre-configured responses for common queries
+  - Domain-specific information retrieval
+  - Confidence scoring for response accuracy
+- **AI-Powered Fallback**: 
+  - Gemini AI integration for handling complex queries
+  - Natural language understanding and generation
+  - Context-aware responses
+- **Role-Based Support**:
   - Business Support Specialist
   - Technical Support Engineer
   - Customer Support Representative
-- **Knowledge Base Integration**: Accurate product information and support responses
-- **AI-Powered Responses**: Gemini AI integration for handling complex queries
-- **Modern UI/UX**: Responsive design with Tailwind CSS
-- **Role-Based Avatar System**: Visual representation of different support roles
+- **Modern UI/UX**: 
+  - Responsive design with Tailwind CSS
+  - Role-based avatar visualization
+  - Professional styling and animations
 
 ## 🛠️ Tech Stack
 
@@ -45,37 +53,28 @@ GEMINI_API_KEY=your_api_key_here
 npm run dev
 ```
 
-## 🔧 Configuration
+## 💡 How It Works
 
-The application uses several configuration files:
+1. **Knowledge Base Processing**:
+   - Queries are first matched against the knowledge base
+   - Responses include confidence scores
+   - High-confidence matches are returned immediately
 
-- `roleConfig.ts`: Define support roles and their properties
-- `app/api/chat/route.ts`: API route handling for chat functionality
-- `app/components/`: React components for the UI
+2. **AI Fallback System**:
+   - Queries without knowledge base matches are processed by Gemini AI
+   - Context-aware responses are generated
+   - Role-specific formatting is applied
 
-## 💡 Usage
+3. **Response Flow**:
+   ```
+   User Query → Knowledge Base Check → [If found] → Return KB Response
+                                   → [If not found] → Generate AI Response
+                                   → Format Based on Role
+   ```
 
-The AI Assistant provides support in three main areas:
+## 🎯 Demo Dataset: Nimbus ERP
 
-1. **Business Support**:
-   - Product information
-   - Pricing details
-   - ROI calculations
-   - Business solutions
-
-2. **Technical Support**:
-   - System configuration
-   - Integration support
-   - Troubleshooting
-   - Technical documentation
-
-3. **Customer Support**:
-   - General inquiries
-   - User guidance
-   - Feature explanations
-   - Support tickets
-
-## 🎯 Key Products
+The system is demonstrated using the Nimbus ERP dataset, which includes:
 
 ### Nimbus Core
 - Comprehensive ERP solution
@@ -86,6 +85,14 @@ The AI Assistant provides support in three main areas:
 - Financial management solution
 - Features: Budgeting, Forecasting, Tax Compliance
 - Pricing: Basic ($29/user/month), Pro ($59/user/month), Enterprise (Custom)
+
+## 🔧 Customization
+
+The system can be adapted for different domains by:
+1. Updating the knowledge base with domain-specific content
+2. Modifying role configurations
+3. Adjusting AI prompts for specific use cases
+4. Customizing avatar representations
 
 ## 🤝 Contributing
 
@@ -99,16 +106,19 @@ The AI Assistant provides support in three main areas:
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## 👥 Team
-
-- Project Lead: [Name]
-- Frontend Development: [Name]
-- AI Integration: [Name]
-- UI/UX Design: [Name]
-
-## 📞 Support
+## 👥 Support
 
 For support and queries:
-- Email: support@nimbusERP.com
 - Documentation: [docs-url]
 - Community Forum: [forum-url]
+- Email: support@example.com
+
+## 🔮 Future Enhancements
+
+- Multi-language support
+- Voice interaction capabilities
+- Enhanced avatar animations
+- Real-time knowledge base updates
+- Advanced analytics and insights
+- Emotion detection and response
+- Integration with external APIs
