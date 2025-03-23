@@ -1,39 +1,25 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import type { Role, Message } from './types';
 import AvatarDisplay from './components/AvatarDisplay';
 import ChatInterface from './components/ChatInterface';
 import Header from './components/Header';
-import { speakText } from './utils/speechUtils';
-import { supabase, createChatSession, saveChatMessage, ChatMessage, ChatSession } from './utils/supabaseClient';
-import { roles } from '@/app/utils/roleConfig';
-
-interface Message {
-  type: 'user' | 'ai';
-  content: string;
-  source?: string;
-  confidence?: number;
-}
-
-interface ApiResponse {
-  response: string;
-  source?: string;
-  confidence?: number;
-}
+import { roles } from './utils/roleConfig';
+import { createChatSession, saveChatMessage, ChatMessage, ChatSession } from './utils/supabaseClient';
 
 export default function Home() {
-  const [selectedRole, setSelectedRole] = useState('business');
+  const [selectedRole, setSelectedRole] = useState<Role>('Business Support Specialist');
   const [messages, setMessages] = useState<Message[]>([
     {
       type: 'ai',
-      content: `Welcome! I'm your ${roles['business'].title}. How can I help optimize your business processes today?`,
+      content: `Welcome! I'm your ${roles['Business Support Specialist'].title}. How can I help optimize your business processes today?`,
       source: 'system',
-      confidence: 1.0
+      confidence: 1.0,
+      role: 'Business Support Specialist'
     }
   ]);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [isSpeechEnabled, setIsSpeechEnabled] = useState(true);
   const [currentSession, setCurrentSession] = useState<ChatSession | null>(null);
   const [sessionError, setSessionError] = useState<string | null>(null);
 
@@ -42,7 +28,6 @@ export default function Home() {
     const initSession = async () => {
       try {
         setSessionError(null);
-        // Generate a stable temporary user ID
         const tempUserId = `temp_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
         console.log('Initializing session for user:', tempUserId);
         
@@ -58,12 +43,13 @@ export default function Home() {
         console.log('Session initialized:', session);
         setCurrentSession(session);
         
-        // Add welcome message based on selected avatar
+        // Add welcome message based on selected role
         const welcomeMessage: Message = {
           type: 'ai',
           content: `Welcome! I'm your ${roles[selectedRole].title}. How can I help you today?`,
           source: 'system',
-          confidence: 1.0
+          confidence: 1.0,
+          role: selectedRole
         };
         setMessages([welcomeMessage]);
         
@@ -77,15 +63,11 @@ export default function Home() {
     initSession();
   }, [selectedRole]);
 
-  const handleSendMessage = (message: Message | string) => {
-    if (typeof message === 'string') {
-      setMessages(prev => [...prev, { type: 'user', content: message }]);
-    } else {
-      setMessages(prev => [...prev, message]);
-    }
+  const handleSendMessage = (message: Message) => {
+    setMessages(prev => [...prev, message]);
   };
 
-  const handleRoleChange = (role: string) => {
+  const handleRoleChange = (role: Role) => {
     setSelectedRole(role);
     // Add welcome message for new role
     setMessages([
@@ -93,7 +75,8 @@ export default function Home() {
         type: 'ai',
         content: `Welcome! I'm your ${roles[role].title}. How can I help you today?`,
         source: 'system',
-        confidence: 1.0
+        confidence: 1.0,
+        role: role
       }
     ]);
   };
@@ -124,7 +107,7 @@ export default function Home() {
         <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-1">
             <AvatarDisplay 
-              selectedAvatar={selectedRole}
+              selectedRole={selectedRole}
               isProcessing={isProcessing}
               currentMessage={messages[messages.length - 1] || null}
             />
@@ -132,10 +115,7 @@ export default function Home() {
           
           <div className="lg:col-span-2">
             <ChatInterface 
-              messages={messages}
-              onSendMessage={handleSendMessage}
               selectedRole={selectedRole}
-              isProcessing={isProcessing}
             />
           </div>
         </div>
